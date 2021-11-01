@@ -1,0 +1,270 @@
+#code to run top trumps game for 1-4 players
+import random
+
+player_decks = []
+player_ratings = []
+#Draw indicator array- set corresponding position to 1 if player has drawn a round
+deck = [[]]
+cats = []
+num_players = 0
+
+
+def get_inputs():
+
+    while True:
+        num_players = input("Enter number of players:\n> ")
+        try:
+            num_players = int(num_players)
+            if num_players > 6:
+                print("Maximum of 6 players")
+                continue
+            break
+        except ValueError:
+            print("That's not right, try again")
+            continue
+
+    deck_res = ""
+    while deck_res == "":
+        deck_res = input("Select deck:\n[A] Athletes\n[C] Creatures\n[M] Marvel\n> ")
+        #load selected deck from other file depending on response
+        if deck_res == "A" or deck_res == "a":
+            from Athletes_Deck import athletes_deck
+            from Athletes_Deck import athletes_cats
+            deck = athletes_deck
+            cats = athletes_cats
+        elif deck_res == "C" or deck_res == "c":
+            from Creatures_Deck import creatures_deck
+            from Creatures_Deck import creatures_cats
+            deck = creatures_deck
+            cats = creatures_cats
+        elif deck_res == "M" or deck_res == "m":
+            from Marvel_Deck import marvel_deck
+            from Marvel_Deck import marvel_cats
+            deck = marvel_deck
+            cats = marvel_cats
+        else:
+            print("Try again\n")
+            continue
+
+    num_cards = len(deck)
+    deck_size = num_cards / num_players
+
+    #ensure players receive same number of cards
+    while num_cards % num_players != 0:
+        num_cards -= 1
+
+#randomly dealing cards into temporary deck then assigning into player decks
+    r = list(range(1, num_cards+1))
+    random.shuffle(r)
+    #print(r)
+#take slice of temporary deck and deal cards to each player
+    for x in range(num_players):
+        r_start = int(x * deck_size)
+        r_end = int((x + 1) * deck_size)
+        r_slice = r[r_start:r_end]
+        player_decks.append(r_slice)
+    print(player_decks)
+
+    start_game(num_players, deck, cats, player_decks, deck_res)
+
+
+#function to display card of any given player
+def show_card(player_card, deck, cats):
+    card_played_index = player_decks[player_card - 1][0] - 1
+    card_played = deck[card_played_index][1:]
+#printing card title and then looping through and printing categories + ratings
+    print(str(card_played[0]))
+    for cat in cats:
+        categ = str(card_played[cats.index(cat)+1])
+        print(f"{cat:13}" + ":  " + categ)
+
+
+def start_game(num_p, deck, cats, player_decks, deck_choi):
+    p_draw = [0] * num_p
+    draw_ind = [0] * num_p
+    p_out = [0] * num_p
+    round_winner = 0
+    stats = [0] * num_p
+    p_ind = 1
+    p_out_count = 0
+    round_count = 1
+    draw_counter = 0
+
+    while True:
+#initialise list to store players currently active if previous round was not a draw
+        chosen_cat = ""
+
+        if draw_counter == 0:
+            draw_deck = []
+            active_players = [0] * num_p
+            cards_in_round = [0] * num_p
+            max_indices = []
+#set up list containing active players
+            for i in range(num_p):
+                if sum(player_decks[i]) != 0:
+                    active_players[i] = i + 1
+
+        print("----------------------------------")
+        print("Start of Round " + str(round_count))
+        print("Active players: " + str(active_players))
+        print("----------------------------------\n")
+
+        #create cards_in_round list to store card reference for each player's current card
+        for pl in active_players:
+            if pl != 0:
+                cards_in_round[pl-1] = player_decks[pl-1][0]
+
+#while loop to identify player's selected category
+        while chosen_cat == "":
+            print("Player " + str(p_ind) + ", choose a category:\n")
+            show_card(p_ind, deck, cats)
+
+            chosen_cat = input("> ")
+
+
+#choices for athletes deck
+        if deck_choi == "A" or deck_choi == "a":
+            if chosen_cat == "c":
+                for p in active_players:
+                    if p != 0:
+                        stats[p-1] = deck[cards_in_round[p-1]-1][2]
+            elif chosen_cat == "le":
+                for p in active_players:
+                    if p != 0:
+                        stats[p-1] = deck[cards_in_round[p-1]-1][3]
+            elif chosen_cat == "a":
+                for p in active_players:
+                    if p != 0:
+                        stats[p-1] = deck[cards_in_round[p-1]-1][4]
+            elif chosen_cat == "s":
+                for p in active_players:
+                    if p != 0:
+                        stats[p-1] = deck[cards_in_round[p-1]-1][5]
+            elif chosen_cat == "li":
+                for p in active_players:
+                    if p != 0:
+                        stats[p-1] = deck[cards_in_round[p-1]-1][6]
+            else:
+                print("Try again")
+                chosen_cat = ""
+                continue
+#choices for creatures deck
+            if deck_choi == "C" or deck_choi == "c":
+                if chosen_cat == "L":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][2]
+                elif chosen_cat == "S":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][3]
+                elif chosen_cat == "I":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][4]
+                elif chosen_cat == "A":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][5]
+                elif chosen_cat == "P":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][6]
+                else:
+                    print("Try again")
+                    chosen_cat = ""
+                    continue
+#choices for marvel deck
+            if deck_choi == "M" or deck_choi == "m":
+                if chosen_cat == "p":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][2]
+                elif chosen_cat == "a":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][3]
+                elif chosen_cat == "s":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][4]
+                elif chosen_cat == "i":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][5]
+                elif chosen_cat == "c":
+                    for p in active_players:
+                        if p != 0:
+                            stats[p-1] = deck[cards_in_round[p-1]-1][6]
+                else:
+                    print("Try again")
+                    chosen_cat = ""
+                    continue
+
+        for pl in active_players:
+            if pl != 0 and pl != p_ind:
+                show_card(pl, deck, cats)
+                print("")
+
+        print(stats)
+        max_value = max(stats)
+        #counting the occurences of the max rating for the round (to see if there's a draw)
+        for i in range(len(stats)):
+            if stats[i] == max_value:
+                max_indices.append(i+1)
+        print("players with max value: " + str(max_indices))
+
+    #if there is a draw
+        if len(max_indices) >= 2:
+            draw_counter += 1
+            act_p_temp = active_players
+            active_players = max_indices
+            print("Draw between ")
+            for i in max_indices:
+                print("player " + str(i))
+                draw_deck = draw_deck + cards_in_round
+            print("draw deck: " + str(draw_deck))
+            for i in player_decks:
+                del i[0]
+            p_ind += 1
+            while p_ind not in max_indices:
+                p_ind += 1
+            round_count += 1
+            continue
+
+#if there is a winner
+        if len(max_indices) == 1:
+            round_winner = stats.index(max_value) + 1
+            print("Player " + str(round_winner) + " wins the round")
+#remove cards from all active players decks and add to back of winner's deck
+            for act in active_players:
+                if act != 0:
+                    del player_decks[act-1][0]
+            for c in cards_in_round:
+                player_decks[round_winner - 1].append(c)
+#if previous round was a draw need to deal those cards to the round winner
+            if draw_counter > 0:
+                for d in draw_deck:
+                    player_decks[round_winner - 1].append(d)
+            draw_counter = 0
+            draw_deck = []
+
+        for n in range(num_p):
+            if sum(player_decks[n]) == 0:
+                p_out_count += 1
+                print("Player " + str(n+1) + " is out")
+                active_players[n] = 0
+        print("active players: " + str(active_players))
+        print("players out: " + str(p_out_count))
+        if num_p - p_out_count == 1:
+            print("\nPlayer " + str(sum(active_players)) + " wins!!!")
+            break
+
+        p_ind += 1
+        while p_ind not in active_players:
+            p_ind += 1
+            if p_ind == 7:
+                p_ind = 1
+        round_count += 1
+
+get_inputs()
